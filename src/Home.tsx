@@ -2,41 +2,22 @@ import { useQuery } from "react-query";
 import axios from "axios";
 import { useEffect, useMemo, useRef, useState } from "react";
 import debounce from "lodash/debounce";
+import { Link, useSearchParams } from "react-router-dom";
+import { API_URL, CharacterListResponse } from "./utils";
 
-const API_URL = "https://rickandmortyapi.com/api";
-
-interface Character {
-  id: number;
-  name: string;
-  status: string;
-  species: string;
-  gender: string;
-  location: {
-    name: string;
-    url: string;
-  };
-  image: string;
-  episode: string[];
-}
-
-interface CharacterListResponse {
-  info: {
-    count: number;
-    pages: number;
-    next: string | null;
-    prev: string | null;
-  };
-  results: Character[];
-}
-
-function App() {
-  const [query, setQuery] = useState("");
+function Home() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const updateDebouncedQuery = useMemo(
-    () => debounce((value: string) => setDebouncedQuery(value), 1000),
+  const updateDebounced = useMemo(
+    () =>
+      debounce((value: string) => {
+        setDebouncedQuery(value);
+        setSearchParams(value ? { q: value } : {});
+      }, 1000),
     []
   );
-  useEffect(() => updateDebouncedQuery(query), [query]);
+  useEffect(() => updateDebounced(query), [query]);
 
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, isPreviousData, isFetching } = useQuery(
@@ -74,7 +55,11 @@ function App() {
         ) : data ? (
           <>
             {data.results.map((char) => {
-              return <div>{char.name}</div>;
+              return (
+                <Link key={char.id} to={`c/${char.id}`}>
+                  {char.name}
+                </Link>
+              );
             })}
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 0))}
@@ -98,4 +83,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
