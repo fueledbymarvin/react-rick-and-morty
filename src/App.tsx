@@ -1,7 +1,7 @@
-import schwifty from "./assets/schwifty.png";
 import { useQuery } from "react-query";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import debounce from "lodash/debounce";
 
 const API_URL = "https://rickandmortyapi.com/api";
 
@@ -30,13 +30,21 @@ interface CharacterListResponse {
 }
 
 function App() {
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const updateDebouncedQuery = useMemo(
+    () => debounce((value: string) => setDebouncedQuery(value), 1000),
+    []
+  );
+  useEffect(() => updateDebouncedQuery(query), [query]);
+
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, isPreviousData, isFetching } = useQuery(
-    ["characters", page],
+    ["characters", debouncedQuery, page],
     async () =>
       (
         await axios.get<CharacterListResponse>(`${API_URL}/character`, {
-          params: { page },
+          params: { page, name: debouncedQuery },
         })
       ).data,
     { keepPreviousData: true }
@@ -45,6 +53,12 @@ function App() {
   return (
     <div className="h-screen w-screen flex flex-col items-center bg-slate-700 text-white">
       <div className="max-w-lg flex flex-col items-center">
+        <input
+          className="text-gray-900"
+          type="text"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
         {isLoading ? (
           <div>Loading...</div>
         ) : isError ? (
