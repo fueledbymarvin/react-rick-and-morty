@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import axios, { AxiosError } from "axios";
 import { useEffect, useMemo, useRef, useState } from "react";
 import debounce from "lodash/debounce";
@@ -19,6 +19,7 @@ function Home() {
   );
   useEffect(() => updateDebounced(query), [query]);
 
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, isPreviousData, isFetching, error } =
     useQuery<CharacterListResponse, AxiosError>(
@@ -31,6 +32,11 @@ function Home() {
         ).data,
       {
         keepPreviousData: true,
+        onSuccess(data) {
+          data.results.forEach((character) => {
+            queryClient.setQueryData(["character", character.id], character);
+          });
+        },
       }
     );
 
