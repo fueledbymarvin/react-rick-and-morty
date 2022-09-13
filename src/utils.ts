@@ -23,3 +23,7 @@ export interface CharacterListResponse {
   };
   results: CharacterResponse[];
 }
+
+export interface CharacterLocationState {
+  fromSearch: boolean;
+}

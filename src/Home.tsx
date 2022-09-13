@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useEffect, useMemo, useRef, useState } from "react";
 import debounce from "lodash/debounce";
 import { Link, useSearchParams } from "react-router-dom";
@@ -20,16 +20,19 @@ function Home() {
   useEffect(() => updateDebounced(query), [query]);
 
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, isPreviousData, isFetching } = useQuery(
-    ["characters", debouncedQuery, page],
-    async () =>
-      (
-        await axios.get<CharacterListResponse>(`${API_URL}/character`, {
-          params: { page, name: debouncedQuery },
-        })
-      ).data,
-    { keepPreviousData: true }
-  );
+  const { data, isLoading, isError, isPreviousData, isFetching, error } =
+    useQuery<CharacterListResponse, AxiosError>(
+      ["characters", debouncedQuery, page],
+      async () =>
+        (
+          await axios.get(`${API_URL}/character`, {
+            params: { page, name: debouncedQuery },
+          })
+        ).data,
+      {
+        keepPreviousData: true,
+      }
+    );
 
   const inputRef = useRef<null | HTMLInputElement>(null);
   useEffect(() => {
@@ -51,12 +54,20 @@ function Home() {
         {isLoading ? (
           <div>Loading...</div>
         ) : isError ? (
-          <div>Oops</div>
+          error.response?.status === 404 ? (
+            <div>0 results</div>
+          ) : (
+            <div>Oops</div>
+          )
         ) : data ? (
           <>
             {data.results.map((char) => {
               return (
-                <Link key={char.id} to={`c/${char.id}`}>
+                <Link
+                  key={char.id}
+                  to={`c/${char.id}`}
+                  state={{ fromSearch: true }}
+                >
                   {char.name}
                 </Link>
               );
