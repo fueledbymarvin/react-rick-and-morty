@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import debounce from "lodash/debounce";
 
 const API_URL = "https://rickandmortyapi.com/api";
@@ -50,10 +50,18 @@ function App() {
     { keepPreviousData: true }
   );
 
+  const inputRef = useRef<null | HTMLInputElement>(null);
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className="h-screen w-screen flex flex-col items-center bg-slate-700 text-white">
       <div className="max-w-lg flex flex-col items-center">
         <input
+          ref={inputRef}
           className="text-gray-900"
           type="text"
           value={query}
