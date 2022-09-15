@@ -25,5 +25,11 @@ export interface CharacterListResponse {
 }
 
 export interface CharacterLocationState {
-  fromSearch: boolean;
+  fromSearch?: boolean;
+  fromChar?: boolean;
+}
+
+export interface LocationResponse {
+  id: number;
+  residents: string[];
 }

@@ -7,6 +7,7 @@ import "./index.css";
 import Home from "./Home";
 import Character from "./Character";
 import NotFound from "./NotFound";
+import ScrollToTop from "./ScrollToTop";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,6 +22,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route index element={<Home />} />
           <Route path="c/:id" element={<Character />} />
